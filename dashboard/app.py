@@ -84,13 +84,13 @@ tot = mv.groupby("opened_month", as_index=False).requests.sum()
 f1 = px.line(tot, x="opened_month", y="requests", template=TEMPLATE, title="All 3-1-1 requests")
 f1.update_traces(line_color="#444444")
 f1.update_layout(xaxis_title=None, yaxis_title="Requests per month", yaxis_rangemode="tozero", margin=dict(t=50, b=10))
-left.plotly_chart(f1, use_container_width=True)
+left.plotly_chart(f1, width="stretch")
 inf = mv[mv.category.isin(sel_groups)]
 f2 = px.bar(inf, x="opened_month", y="requests", color="category", color_discrete_map=COLORS,
             category_orders={"category": GROUPS}, template=TEMPLATE, title="Infrastructure requests by group")
 f2.update_layout(xaxis_title=None, yaxis_title="Requests per month", legend_title=None,
                  legend=dict(orientation="h", y=-0.15), margin=dict(t=50, b=10))
-right.plotly_chart(f2, use_container_width=True)
+right.plotly_chart(f2, width="stretch")
 
 # ---- Categories & neighbourhoods -----------------------------------------
 st.subheader("Where demand comes from")
@@ -105,7 +105,7 @@ f3 = px.bar(types, x="requests", y="request_type", color="infrastructure_group",
             category_orders={"request_type": types.request_type.tolist()})
 f3.update_layout(yaxis_title=None, xaxis_title="Requests", legend_title=None, legend=dict(orientation="h", y=-0.2),
                  margin=dict(t=50, b=10))
-left.plotly_chart(f3, use_container_width=True)
+left.plotly_chart(f3, width="stretch")
 
 nb = query(
     """SELECT local_area, infrastructure_group, count(*) AS requests
@@ -117,7 +117,7 @@ f4 = px.bar(nb, x="requests", y="local_area", color="infrastructure_group", colo
             orientation="h", template=TEMPLATE, title="Infrastructure requests by neighbourhood (raw counts)",
             category_orders={"local_area": order})
 f4.update_layout(yaxis_title=None, xaxis_title="Requests", showlegend=False, height=520, margin=dict(t=50, b=10))
-right.plotly_chart(f4, use_container_width=True)
+right.plotly_chart(f4, width="stretch")
 right.caption("Raw counts, not per capita; neighbourhood population and area differ. "
               "Requests without a recorded location are excluded here.")
 
@@ -134,7 +134,7 @@ f5 = px.box(dur, x="infrastructure_group", y="days_to_close", color="infrastruct
             title="Days from open to close (closed requests)")
 f5.update_yaxes(range=[0, 60], title="Days (axis capped at 60)")
 f5.update_layout(xaxis_title=None, showlegend=False, margin=dict(t=50, b=10))
-left.plotly_chart(f5, use_container_width=True)
+left.plotly_chart(f5, width="stretch")
 left.caption("Close date has day resolution, so same-day closure is 0 days. Recently opened requests are less "
              "likely to be closed yet, which biases recent durations downward.")
 
@@ -152,7 +152,7 @@ f6 = px.bar(out, x="pct", y="infrastructure_group", color="outcome_group", orien
             title="What 'Closed' means: closure outcome mix")
 f6.update_layout(xaxis_title="% of closed requests", yaxis_title=None, legend_title=None,
                  legend=dict(orientation="h", y=-0.25), margin=dict(t=50, b=10))
-right.plotly_chart(f6, use_container_width=True)
+right.plotly_chart(f6, width="stretch")
 
 # ---- Seasonality ----------------------------------------------------------
 st.subheader("Seasonal pattern")
@@ -175,7 +175,7 @@ f7 = go.Figure(go.Heatmap(z=heat.values, x=SEASONS, y=heat.index, zmid=100, zmin
                           colorbar=dict(title="Index")))
 f7.update_layout(template=TEMPLATE, title="Seasonal index (100 = mean of the group's four season averages)",
                  yaxis_autorange="reversed", margin=dict(t=50, b=10), height=330)
-st.plotly_chart(f7, use_container_width=True)
+st.plotly_chart(f7, width="stretch")
 
 # ---- Insights -------------------------------------------------------------
 st.subheader("Operational observations")
