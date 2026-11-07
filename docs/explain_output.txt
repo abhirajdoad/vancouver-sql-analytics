@@ -1,0 +1,69 @@
+=== A. Monthly pothole requests in 2025, WITHOUT supporting indexes
+BEGIN
+DROP INDEX
+                                                                  QUERY PLAN                                                                  
+----------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize GroupAggregate (actual rows=12 loops=1)
+   Group Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
+   Buffers: shared hit=16131 read=669 written=71
+   ->  Gather Merge (actual rows=36 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         Buffers: shared hit=16131 read=669 written=71
+         ->  Partial GroupAggregate (actual rows=12 loops=3)
+               Group Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
+               Buffers: shared hit=16131 read=669 written=71
+               ->  Sort (actual rows=1281 loops=3)
+                     Sort Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
+                     Sort Method: quicksort  Memory: 49kB
+                     Buffers: shared hit=16131 read=669 written=71
+                     Worker 0:  Sort Method: quicksort  Memory: 49kB
+                     Worker 1:  Sort Method: quicksort  Memory: 49kB
+                     ->  Hash Join (actual rows=1281 loops=3)
+                           Hash Cond: (f.request_type_id = t.request_type_id)
+                           Buffers: shared hit=16115 read=669 written=71
+                           ->  Parallel Seq Scan on fact_service_request f (actual rows=90856 loops=3)
+                                 Filter: ((opened_date >= '2025-01-01'::date) AND (opened_date < '2026-01-01'::date))
+                                 Rows Removed by Filter: 350446
+                                 Buffers: shared hit=16076 read=669 written=71
+                           ->  Hash (actual rows=1 loops=3)
+                                 Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                 Buffers: shared hit=11
+                                 ->  Index Scan using dim_request_type_service_request_type_key on dim_request_type t (actual rows=1 loops=3)
+                                       Index Cond: (service_request_type = 'Pothole Case'::text)
+                                       Buffers: shared hit=11
+ Planning:
+   Buffers: shared hit=226
+ Planning Time: 0.344 ms
+ Execution Time: 39.084 ms
+(33 rows)
+
+ROLLBACK
+=== B. Same query WITH idx_fact_type_opened (request_type_id, opened_date)
+                                                                          QUERY PLAN                                                                          
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate (actual rows=12 loops=1)
+   Group Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
+   Buffers: shared hit=2167
+   ->  Sort (actual rows=3844 loops=1)
+         Sort Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
+         Sort Method: quicksort  Memory: 97kB
+         Buffers: shared hit=2167
+         ->  Nested Loop (actual rows=3844 loops=1)
+               Buffers: shared hit=2167
+               ->  Index Scan using dim_request_type_service_request_type_key on dim_request_type t (actual rows=1 loops=1)
+                     Index Cond: (service_request_type = 'Pothole Case'::text)
+                     Buffers: shared hit=3
+               ->  Bitmap Heap Scan on fact_service_request f (actual rows=3844 loops=1)
+                     Recheck Cond: ((request_type_id = t.request_type_id) AND (opened_date >= '2025-01-01'::date) AND (opened_date < '2026-01-01'::date))
+                     Heap Blocks: exact=2157
+                     Buffers: shared hit=2164
+                     ->  Bitmap Index Scan on idx_fact_type_opened (actual rows=3844 loops=1)
+                           Index Cond: ((request_type_id = t.request_type_id) AND (opened_date >= '2025-01-01'::date) AND (opened_date < '2026-01-01'::date))
+                           Buffers: shared hit=7
+ Planning:
+   Buffers: shared hit=50
+ Planning Time: 0.202 ms
+ Execution Time: 2.815 ms
+(23 rows)
+

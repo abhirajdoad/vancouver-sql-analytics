@@ -1,0 +1,16 @@
+infrastructure_group,rank,local_area,requests,pct_of_group
+Drainage & Flooding,1,Kensington-Cedar Cottage,893,8.3
+Drainage & Flooding,2,Downtown,878,8.2
+Drainage & Flooding,3,Kitsilano,801,7.4
+"Lighting, Signals & Signs",1,Downtown,2751,8.6
+"Lighting, Signals & Signs",2,Renfrew-Collingwood,2696,8.4
+"Lighting, Signals & Signs",3,Kensington-Cedar Cottage,2651,8.3
+Roads & Sidewalks,1,Downtown,4174,9.4
+Roads & Sidewalks,2,Kensington-Cedar Cottage,3552,8.0
+Roads & Sidewalks,3,Renfrew-Collingwood,3124,7.1
+Sewer,1,Kensington-Cedar Cottage,1269,10.0
+Sewer,2,Hastings-Sunrise,1256,9.9
+Sewer,3,Kitsilano,1144,9.0
+Water Supply,1,Kensington-Cedar Cottage,1000,8.4
+Water Supply,2,Renfrew-Collingwood,845,7.1
+Water Supply,3,Hastings-Sunrise,837,7.1

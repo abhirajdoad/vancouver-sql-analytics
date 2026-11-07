@@ -1,0 +1,11 @@
+infrastructure_group,service_request_type,open_over_90d,oldest_open_days,avg_age_days
+Roads & Sidewalks,Street Repair Case,325,1729,878
+Roads & Sidewalks,Sidewalk Repair Case,219,1594,765
+Roads & Sidewalks,Pothole Case,95,1766,652
+"Lighting, Signals & Signs",Street Light Out Case,87,1706,655
+Roads & Sidewalks,Bridge and Structures Maintenance Case,67,1476,656
+"Lighting, Signals & Signs",Sign Repair Case,59,1767,558
+Drainage & Flooding,Street Surface Water Flooding Case,58,1627,809
+Roads & Sidewalks,General Street Issues Case,45,1474,689
+"Lighting, Signals & Signs",Street Light Pole Maintenance Case,37,1529,361
+Roads & Sidewalks,Street Construction Concern Case,23,1442,602

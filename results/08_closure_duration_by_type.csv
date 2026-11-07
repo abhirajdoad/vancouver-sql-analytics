@@ -1,0 +1,23 @@
+infrastructure_group,service_request_type,closed_requests,mean_days,median_days,p90_days
+"Lighting, Signals & Signs",Street Light Out Case,16959,22.3,8.0,48
+Sewer,Sewer Operations Inquiry Case,1387,10.9,7.0,20
+Roads & Sidewalks,Street Repair Case,9289,18.0,6.0,33
+Water Supply,Water Leak Case,7903,9.3,6.0,20
+Drainage & Flooding,Street Surface Water Flooding Case,9470,10.1,6.0,16
+Roads & Sidewalks,Pothole Case,19711,10.8,5.0,22
+Roads & Sidewalks,Sidewalk Repair Case,8781,12.3,5.0,20
+"Lighting, Signals & Signs",Street Light Pole Maintenance Case,2350,36.8,4.0,83
+Roads & Sidewalks,Bridge and Structures Maintenance Case,1219,17.6,4.0,24
+Sewer,Preventative Maintenance Program Case,2883,7.2,4.0,17
+"Lighting, Signals & Signs",Sign Repair Case,7208,10.4,4.0,17
+Drainage & Flooding,Catch Basin Concern Case,1385,9.5,4.0,16
+Roads & Sidewalks,General Street Issues Case,2852,9.5,4.0,13
+Sewer,Sewer Maintenance Hole Concern Case,1713,7.9,3.0,16
+"Lighting, Signals & Signs",Traffic Signal Repair Case,4800,7.4,3.0,15
+Water Supply,Water Hydrant Concern Case,1362,6.4,3.0,14
+Water Supply,Water Quality Concern Case,2160,7.3,3.0,13
+Roads & Sidewalks,Street Construction Concern Case,2906,9.2,3.0,12
+Sewer,Sewer Construction Concern Case,1419,6.0,2.0,11
+"Lighting, Signals & Signs",Pavement Marking Maintenance Case,1130,18.2,1.0,20
+Water Supply,Water Pressure Concern Case,627,4.7,1.0,10
+Sewer,Sewer Backup Case,5360,2.3,1.0,4
