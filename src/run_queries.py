@@ -16,7 +16,7 @@ def main():
             cur = conn.execute(path.read_text())
             rows = cur.fetchall()
             with open(OUT / f"{path.stem}.csv", "w", newline="") as f:
-                w = csv.writer(f)
+                w = csv.writer(f, lineterminator='\n')
                 w.writerow([c.name for c in cur.description])
                 w.writerows(rows)
             print(f"{path.name}: {len(rows)} rows")

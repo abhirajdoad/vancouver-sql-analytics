@@ -5,7 +5,7 @@
 | Column | Meaning | Notes |
 |---|---|---|
 | department | City unit handling the request | 70 values; two legacy "ZZ" departments |
-| service_request_type | Type of case | 255 values; "ZZ - OLD..." are retired types |
+| service_request_type | Type of case | 255 values; "ZZ - OLD..." and "Z - ..." are retired types |
 | status | Last known status | `Close` or `Open` |
 | closure_reason | Reason recorded at closure | 18 values; `N/A` for 16,686 of 16,867 open requests |
 | service_request_open_timestamp | When opened | UTC |
@@ -25,8 +25,8 @@ The source has no request ID, so there is no natural key.
 `closed_date`, `days_to_close` (closed_date - opened_date; NULL if open or anomalous), `date_anomaly` (closed_date earlier than opened_date),
 `last_modified_at`, `latitude`, `longitude`.
 
-**Lookups:** `dim_department`, `dim_request_type` (with analyst-defined `infrastructure_group`), `dim_local_area`,
-`dim_channel`, `dim_closure_reason` (with analyst-defined `outcome_group`).
+**Lookups:** `dim_department`, `dim_request_type` (with a subjective `infrastructure_group`, 24 types), `dim_local_area`,
+`dim_channel`, `dim_closure_reason` (with my own `outcome_group` classification).
 
 **Views:** `v_request_detail` (flat, with season/month/year), `v_complete_months`, `v_monthly_volume`, `v_closure_duration`.
 

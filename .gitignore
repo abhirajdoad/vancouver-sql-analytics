@@ -4,3 +4,4 @@ data/raw/*
 !data/raw/README.md
 .DS_Store
 *.log
+CLAUDE.md

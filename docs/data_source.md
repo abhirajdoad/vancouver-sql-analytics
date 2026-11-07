@@ -10,6 +10,6 @@
 - **File SHA-256:** `9d103937fd48d344022b68690e970d4ddb0ee54faef5ba464b9466dee8a8aabd`
 
 The dataset is refreshed by the City, so a later download will have more rows and a different hash.
-Results in this repo describe the snapshot above.
+The results in this repository describe the snapshot above.
 
 Contains information licensed under the Open Government Licence - Vancouver.

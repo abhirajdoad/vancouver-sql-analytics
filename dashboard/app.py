@@ -45,9 +45,9 @@ st.caption(
 with st.sidebar:
     st.header("Filters")
     sel_groups = st.multiselect("Infrastructure groups", GROUPS, default=GROUPS)
-    years = st.slider("Year opened", 2022, int(meta.hi.year), (2022, int(meta.hi.year)))
+    years = st.slider("Year opened", int(meta.lo.year), int(meta.hi.year), (int(meta.lo.year), int(meta.hi.year)))
     st.caption("Filters apply to the infrastructure sections. 'Infrastructure' is an analyst-defined grouping "
-               "of 22 request types (see docs/methodology.md).")
+               "of request types (see docs/methodology.md).")
 
 if not sel_groups:
     st.warning("Select at least one infrastructure group.")
@@ -68,8 +68,8 @@ total = query("SELECT count(*) n FROM analytics.v_request_detail WHERE opened_ye
 c = st.columns(5)
 c[0].metric("All 3-1-1 requests", f"{total:,}")
 c[1].metric(f"Infrastructure ({k.infra / total:.1%})", f"{int(k.infra):,}")
-c[2].metric("Median days to close", f"{k.median_days:.0f}")
-c[3].metric("Closed as 'Service provided'", f"{k.provided / k.closed:.0%}")
+c[2].metric("Median days to close", f"{k.median_days:.0f}" if pd.notna(k.median_days) else "n/a")
+c[3].metric("Closed as 'Service provided'", f"{k.provided / k.closed:.0%}" if k.closed else "n/a")
 c[4].metric("Still open", f"{int(k.open_n):,}")
 st.caption("'Closed' is a 3-1-1 case status. Only the 'Service provided' closure reason indicates delivered service; "
            "other reasons include referrals, hand-offs to crews and no-action closures.")
@@ -170,10 +170,10 @@ sea = sea[sea.category.isin(sel_groups)]
 sea["index"] = 100 * sea.avg_monthly / sea.groupby("category").avg_monthly.transform("mean")
 heat = sea.pivot(index="category", columns="season", values="index").reindex(
     [g for g in GROUPS if g in sel_groups])[SEASONS]
-f7 = go.Figure(go.Heatmap(z=heat.values, x=SEASONS, y=heat.index, zmid=100, zmin=40, zmax=160,
+f7 = go.Figure(go.Heatmap(z=heat.values, x=SEASONS, y=heat.index, zmid=100, zmin=20, zmax=180,
                           colorscale="RdBu_r", text=heat.round(0).astype(int).values, texttemplate="%{text}",
                           colorbar=dict(title="Index")))
-f7.update_layout(template=TEMPLATE, title="Seasonal index (100 = the group's average month)",
+f7.update_layout(template=TEMPLATE, title="Seasonal index (100 = mean of the group's four season averages)",
                  yaxis_autorange="reversed", margin=dict(t=50, b=10), height=330)
 st.plotly_chart(f7, use_container_width=True)
 
@@ -183,25 +183,30 @@ top_type = types.iloc[-1]
 top_nb = order[-1]
 fl = sea[sea.category == "Drainage & Flooding"].set_index("season")["index"] if "Drainage & Flooding" in sel_groups else None
 slow = query(
-    """SELECT regexp_replace(service_request_type, ' Case$', '') AS t, median_days, p90_days
-       FROM analytics.v_closure_duration WHERE infrastructure_group = ANY(%s) AND closed_requests >= 200
-       ORDER BY p90_days DESC LIMIT 1""", (G,))
-spikes = query("""SELECT opened_date, requests FROM (
-        SELECT opened_date, count(*) AS requests FROM analytics.v_request_detail
-        WHERE infrastructure_group = 'Drainage & Flooding' GROUP BY 1) d ORDER BY requests DESC LIMIT 1""")
+    """SELECT regexp_replace(service_request_type, ' Case$', '') AS t,
+              percentile_cont(0.5) WITHIN GROUP (ORDER BY days_to_close) AS median_days,
+              percentile_cont(0.9) WITHIN GROUP (ORDER BY days_to_close) AS p90_days
+       FROM analytics.v_request_detail
+       WHERE status = 'Closed' AND days_to_close IS NOT NULL AND NOT is_legacy
+         AND infrastructure_group = ANY(%s) AND opened_year BETWEEN %s AND %s
+       GROUP BY 1 HAVING count(*) >= 200 ORDER BY p90_days DESC LIMIT 1""", (G, *Y))
+spikes = query(
+    """SELECT opened_date, count(*) AS requests FROM analytics.v_request_detail
+       WHERE infrastructure_group = 'Drainage & Flooding' AND opened_year BETWEEN %s AND %s
+       GROUP BY 1 ORDER BY 2 DESC LIMIT 1""", Y)
 bullets = [
     f"**{top_type.request_type}** is the largest infrastructure request type in the selected period "
     f"({int(top_type.requests):,} requests); **{top_nb}** has the most infrastructure requests of any neighbourhood.",
 ]
 if fl is not None and not fl.empty:
-    bullets.append(f"Drainage and flooding requests run at {fl.max():.0f} (autumn/winter peak) versus "
-                   f"{fl.min():.0f} at the seasonal low on the index, so crew readiness matters most in the wet months.")
+    bullets.append(f"Drainage and flooding requests peak at {fl.max():.0f} on the seasonal index ({fl.idxmax()}) "
+                   f"and bottom out at {fl.min():.0f} ({fl.idxmin()}). Weather was not analysed here.")
 if not slow.empty:
     s = slow.iloc[0]
-    bullets.append(f"**{s.t}** has the longest tail: median {s.median_days:.0f} days but 90th percentile {s.p90_days:.0f} days.")
-if len(spikes):
-    bullets.append(f"A single day, {spikes.iloc[0].opened_date:%b %d, %Y}, produced {int(spikes.iloc[0].requests):,} "
-                   "drainage/flooding requests. Single-day spikes like this can swing annual totals in this category.")
+    bullets.append(f"**{s.t}** has the longest tail among closed requests: median {s.median_days:.0f} days, 90th percentile {s.p90_days:.0f} days.")
+if "Drainage & Flooding" in sel_groups and len(spikes):
+    bullets.append(f"The busiest single day for drainage and flooding requests in these years was "
+                   f"{spikes.iloc[0].opened_date:%b %d, %Y} ({int(spikes.iloc[0].requests):,} requests).")
 for b in bullets:
     st.markdown(f"- {b}")
 st.caption("Observations describe reported 3-1-1 demand, not physical infrastructure condition. See docs/methodology.md for limitations.")

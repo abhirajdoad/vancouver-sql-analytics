@@ -1,5 +1,6 @@
 -- Q2b. Seasonal pattern: average requests per month in each season, indexed against the
--- category's own all-season monthly average (100 = average month). Complete months only.
+-- mean of the category's four season averages (100 = typical season). Complete months only; seasons have
+-- 14 or 15 observed months because the data ends in November.
 WITH monthly AS (
     SELECT v.opened_month, v.category, v.requests,
            CASE WHEN extract(month FROM v.opened_month) IN (12, 1, 2) THEN 'Winter'

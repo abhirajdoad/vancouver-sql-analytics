@@ -1,8 +1,9 @@
 -- Q6a. Days with unusually high drainage/flooding demand: daily count vs. the trailing 60-day
--- mean and standard deviation (z-score). Subquery filters to the spike days.
+-- mean and standard deviation (z-score). Needs at least 30 prior days, so January 2022 is not scored.
 SELECT opened_date, requests, round(trailing_mean, 1) AS trailing_60d_mean, round(z_score, 1) AS z_score
 FROM (
     SELECT opened_date, requests,
+           count(*)              OVER w AS prior_days,
            avg(requests)         OVER w AS trailing_mean,
            (requests - avg(requests) OVER w) / NULLIF(stddev_samp(requests) OVER w, 0) AS z_score
     FROM (
@@ -14,6 +15,6 @@ FROM (
     ) daily
     WINDOW w AS (ORDER BY opened_date ROWS BETWEEN 60 PRECEDING AND 1 PRECEDING)
 ) scored
-WHERE z_score >= 3 AND requests >= 20
+WHERE prior_days >= 30 AND z_score >= 3 AND requests >= 20
 ORDER BY requests DESC
 LIMIT 10;

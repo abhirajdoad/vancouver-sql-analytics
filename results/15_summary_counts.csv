@@ -1,0 +1,15 @@
+metric,value
+all requests,1323904.0
+infrastructure requests,110823.0
+infrastructure share of all (%),8.4
+infrastructure requests without local_area,2939.0
+infrastructure requests still open,1854.0
+infrastructure open > 90 days,1133.0
+"infrastructure closed as ""Service provided"" (% of closed)",69.4
+infrastructure median days to close,5.0
+requests with close date before local open date,27.0
+requests opened in 2022,283839.0
+requests opened in 2023,267128.0
+requests opened in 2024,271017.0
+requests opened in 2025,272567.0
+requests opened in 2026,229353.0

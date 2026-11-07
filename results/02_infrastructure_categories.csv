@@ -1,23 +1,25 @@
 infrastructure_group,service_request_type,requests,pct_of_infrastructure,group_total,rank_in_group
-Roads & Sidewalks,Pothole Case,19823,17.3,45662,1
-Roads & Sidewalks,Street Repair Case,9653,8.4,45662,2
-Roads & Sidewalks,Sidewalk Repair Case,9048,7.9,45662,3
-Roads & Sidewalks,Street Construction Concern Case,2937,2.6,45662,4
-Roads & Sidewalks,General Street Issues Case,2909,2.5,45662,5
-Roads & Sidewalks,Bridge and Structures Maintenance Case,1292,1.1,45662,6
-"Lighting, Signals & Signs",Street Light Out Case,17235,15.0,33041,1
-"Lighting, Signals & Signs",Sign Repair Case,7373,6.4,33041,2
-"Lighting, Signals & Signs",Traffic Signal Repair Case,4871,4.2,33041,3
-"Lighting, Signals & Signs",Street Light Pole Maintenance Case,2417,2.1,33041,4
-"Lighting, Signals & Signs",Pavement Marking Maintenance Case,1145,1.0,33041,5
-Sewer,Sewer Backup Case,5377,4.7,12892,1
-Sewer,Preventative Maintenance Program Case,2935,2.6,12892,2
-Sewer,Sewer Maintenance Hole Concern Case,1737,1.5,12892,3
-Sewer,Sewer Construction Concern Case,1436,1.3,12892,4
-Sewer,Sewer Operations Inquiry Case,1407,1.2,12892,5
-Water Supply,Water Leak Case,7953,6.9,12163,1
-Water Supply,Water Quality Concern Case,2187,1.9,12163,2
-Water Supply,Water Hydrant Concern Case,1393,1.2,12163,3
-Water Supply,Water Pressure Concern Case,630,0.5,12163,4
-Drainage & Flooding,Street Surface Water Flooding Case,9564,8.3,10990,1
-Drainage & Flooding,Catch Basin Concern Case,1426,1.2,10990,2
+Roads & Sidewalks,Pothole Case,19823,17.9,42725,1
+Roads & Sidewalks,Street Repair Case,9653,8.7,42725,2
+Roads & Sidewalks,Sidewalk Repair Case,9048,8.2,42725,3
+Roads & Sidewalks,General Street Issues Case,2909,2.6,42725,4
+Roads & Sidewalks,Bridge and Structures Maintenance Case,1292,1.2,42725,5
+"Lighting, Signals & Signs",Street Light Out Case,17235,15.6,34479,1
+"Lighting, Signals & Signs",Sign Repair Case,7373,6.7,34479,2
+"Lighting, Signals & Signs",Traffic Signal Repair Case,4871,4.4,34479,3
+"Lighting, Signals & Signs",Street Light Pole Maintenance Case,2417,2.2,34479,4
+"Lighting, Signals & Signs",Pavement Marking Maintenance Case,1145,1.0,34479,5
+"Lighting, Signals & Signs",Street or Traffic Light Utility Damage Case,943,0.9,34479,6
+"Lighting, Signals & Signs",Pavement Markings Case,495,0.4,34479,7
+Water Supply,Water Leak Case,7953,7.2,12339,1
+Water Supply,Water Quality Concern Case,2187,2.0,12339,2
+Water Supply,Water Hydrant Concern Case,1393,1.3,12339,3
+Water Supply,Water Pressure Concern Case,630,0.6,12339,4
+Water Supply,Damage to Water System Case,176,0.2,12339,5
+Drainage & Flooding,Street Surface Water Flooding Case,9564,8.6,10990,1
+Drainage & Flooding,Catch Basin Concern Case,1426,1.3,10990,2
+Sewer,Sewer Backup Case,5377,4.9,10290,1
+Sewer,Preventative Maintenance Program Case,2935,2.6,10290,2
+Sewer,Sewer Maintenance Hole Concern Case,1737,1.6,10290,3
+Sewer,Sewer Odour Case,178,0.2,10290,4
+Sewer,Sewer Utility Damage Case,63,0.1,10290,5

@@ -52,7 +52,10 @@ SELECT r.closure_reason,
 FROM (SELECT DISTINCT closure_reason FROM staging.service_requests_raw) r
 ORDER BY 1;
 
--- Infrastructure grouping is an explicit analyst-defined mapping (types not listed are non-infrastructure).
+-- Infrastructure grouping is an explicit, subjective mapping (types not listed are non-infrastructure).
+-- Included: reports of defects, damage, leaks, outages and maintenance on streets, sidewalks, lighting/signals/signs,
+-- sewers, drainage and the water system. Excluded: inquiries, permit/meter/service-line requests, requests for new
+-- assets (new signs, signals, light poles), construction-concern complaints, cleaning and litter, and bylaw cases.
 CREATE TABLE analytics.dim_request_type (
     request_type_id      serial PRIMARY KEY,
     service_request_type text NOT NULL UNIQUE,
@@ -64,17 +67,17 @@ WITH infra(service_request_type, infrastructure_group) AS (VALUES
   ('Pothole Case',                              'Roads & Sidewalks'),
   ('Street Repair Case',                        'Roads & Sidewalks'),
   ('Sidewalk Repair Case',                      'Roads & Sidewalks'),
-  ('Street Construction Concern Case',          'Roads & Sidewalks'),
   ('General Street Issues Case',                'Roads & Sidewalks'),
   ('Bridge and Structures Maintenance Case',    'Roads & Sidewalks'),
   ('Street Surface Water Flooding Case',        'Drainage & Flooding'),
   ('Catch Basin Concern Case',                  'Drainage & Flooding'),
   ('Sewer Backup Case',                         'Sewer'),
   ('Sewer Maintenance Hole Concern Case',       'Sewer'),
-  ('Sewer Construction Concern Case',           'Sewer'),
-  ('Sewer Operations Inquiry Case',             'Sewer'),
   ('Preventative Maintenance Program Case',     'Sewer'),
+  ('Sewer Odour Case',                          'Sewer'),
+  ('Sewer Utility Damage Case',                 'Sewer'),
   ('Water Leak Case',                           'Water Supply'),
+  ('Damage to Water System Case',               'Water Supply'),
   ('Water Hydrant Concern Case',                'Water Supply'),
   ('Water Pressure Concern Case',               'Water Supply'),
   ('Water Quality Concern Case',                'Water Supply'),
@@ -82,11 +85,13 @@ WITH infra(service_request_type, infrastructure_group) AS (VALUES
   ('Street Light Pole Maintenance Case',        'Lighting, Signals & Signs'),
   ('Traffic Signal Repair Case',                'Lighting, Signals & Signs'),
   ('Sign Repair Case',                          'Lighting, Signals & Signs'),
+  ('Street or Traffic Light Utility Damage Case','Lighting, Signals & Signs'),
+  ('Pavement Markings Case',                    'Lighting, Signals & Signs'),
   ('Pavement Marking Maintenance Case',         'Lighting, Signals & Signs')
 )
 INSERT INTO analytics.dim_request_type (service_request_type, department_id, infrastructure_group, is_legacy)
 SELECT t.service_request_type, d.department_id, i.infrastructure_group,
-       t.service_request_type LIKE 'ZZ%' OR t.department LIKE 'ZZ%'
+       t.service_request_type ~ '^ZZ? ?-' OR t.department LIKE 'ZZ%'
 FROM (SELECT DISTINCT service_request_type, department FROM staging.service_requests_raw) t
 JOIN analytics.dim_department d ON d.department = t.department
 LEFT JOIN infra i ON i.service_request_type = t.service_request_type

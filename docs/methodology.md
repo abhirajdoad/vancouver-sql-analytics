@@ -1,35 +1,38 @@
 # Methodology, findings and limitations
 
 ## Pipeline
-1. `src/download.py` fetches the CSV; `src/load.py` creates the schema, bulk-loads the CSV with `COPY` into a text-only staging table, then runs `sql/02_transform.sql` (lookups + fact table), `03_constraints_indexes.sql` and `04_views.sql`.
-2. `src/run_queries.py` runs the 14 queries in `sql/queries/` and writes `results/*.csv`.
-3. `src/validate.py` recomputes row counts, monthly volume, infrastructure totals, neighbourhood counts and median closure days from the raw CSV in pandas and compares them with the database (11 checks, all pass).
-4. `dashboard/app.py` (Streamlit + Plotly) reads the views. Power BI Desktop is not available on macOS; Streamlit keeps the dashboard as reviewable code.
+1. `src/download.py` fetches the CSV. `src/load.py` creates the schema, bulk-loads the CSV with `COPY` into a text-only staging table, then runs `02_transform.sql` (lookups and fact table), `03_constraints_indexes.sql` and `04_views.sql`.
+2. `src/run_queries.py` runs the 15 queries in `sql/queries/` and writes `results/*.csv`. Every number quoted below comes from one of those files.
+3. `src/validate.py` recomputes results from the raw CSV in pandas and compares them with the database (11 checks): row counts, status counts, date anomalies, the sum of per-row `days_to_close`, monthly volume, the infrastructure type list (restated in the script), group totals, neighbourhood counts, median closure days, and the "Service provided" count.
+4. `dashboard/app.py` reads the views.
 
-## Key decisions
-- **Time zone.** Timestamps are UTC but close dates are local dates. Comparing them directly flagged 44,180 requests as closed before they opened; after converting to America/Vancouver only 27 remain. Those 27 are kept, flagged `date_anomaly`, and get a NULL duration.
-- **Infrastructure definition.** 22 request types are mapped to five groups (Roads & Sidewalks, Lighting/Signals/Signs, Sewer, Water Supply, Drainage & Flooding) in `02_transform.sql`. This is a judgement; types such as Boulevard Maintenance, Snow and Ice Removal or Water Conservation Violation were left out. Totals change if the mapping changes.
-- **Closed is not resolved.** `status = Closed` means the 3-1-1 case was closed. `closure_reason` shows why. Only "Service provided" indicates delivered service; I grouped the other reasons into hand-offs/planned action, referrals, no action, and unknown (`dim_closure_reason.outcome_group`, my classification). Among closed infrastructure requests, 69.1% are "Service provided"; for Roads & Sidewalks it is 60.8% and Drainage & Flooding 61.0%, versus 84% for Sewer and Water Supply (Query 9).
-- **Partial month.** November 2026 is incomplete and excluded from monthly, seasonal and trend queries. Year-over-year uses Jan-Oct for every year.
+## Decisions and assumptions
+- **Time zone.** Source timestamps are UTC, close dates are local dates. Comparing them directly flagged 44,180 requests as closed before they opened; after converting to America/Vancouver, 27 remain. Those are kept, flagged `date_anomaly`, and get a NULL duration.
+- **Infrastructure definition (subjective).** 24 request types are mapped to five groups in `02_transform.sql`: Roads & Sidewalks, Lighting/Signals/Signs, Sewer, Water Supply, Drainage & Flooding. I included reports of defects, damage, leaks, outages and maintenance. I excluded inquiries, permit/meter/service-line requests, requests for new assets (new signs, signals, light poles), construction-concern complaints, street cleaning and litter, and bylaw cases. Borderline inclusions: `Preventative Maintenance Program Case` (it sits under Sewer Operations), `General Street Issues Case`, and `Water Quality Concern Case`. The totals depend on this list; changing it changes every infrastructure figure.
+- **Closed is not resolved.** `status = Closed` means the 3-1-1 case was closed. `closure_reason` records why. Only "Service provided" indicates that service was delivered. I grouped the other 17 reasons into four outcome groups (hand-off/action planned, referred, no action, unknown) in `dim_closure_reason.outcome_group`; that grouping is my own. Even "Service provided" is a case-system label, not a verified repair.
+- **Partial month.** November 2026 is incomplete and is excluded from the monthly, seasonal and trend queries. Year-over-year compares January to October of each year.
+- **Seasons** are meteorological (Dec-Feb, Mar-May, Jun-Aug, Sep-Nov). The seasonal index is a season's average monthly count divided by the mean of that group's four season averages. Winter and autumn have 14 observed months, spring and summer 15.
+- **Closure durations** use closed requests with a valid close date, in whole days. Retired types ("ZZ - OLD", "Z - ") are excluded from duration statistics but not from volume counts.
 
 ## Findings (snapshot of 2026-11-06)
-- 1,323,904 requests; 114,748 (8.7%) fall in the infrastructure groups. Sanitation is the largest department (25.8% of all requests). (Q1)
-- Largest infrastructure types: Pothole (19,823), Street Light Out (17,235), Street Repair (9,653), Street Surface Water Flooding (9,564), Sidewalk Repair (9,048). Roads & Sidewalks is the largest group (45,662). (Q2)
-- Total monthly volume ranges about 19,000-29,000 with no clear long-run growth: annual totals are 283,839 (2022), 267,128 (2023), 271,017 (2024), 272,567 (2025). 2026 has 229,353 through Nov 5. (Q3, Q10)
-- Seasonality differs by group. Drainage & Flooding runs at index 136-137 in winter/autumn and 52 in summer. Roads & Sidewalks peaks in spring (125) and is lowest in autumn (78). Lighting peaks in autumn/winter (115/112). Sewer and Water Supply are close to flat (index 90-115). Weather and shorter daylight are plausible drivers; no weather data was joined, so this is not tested. (Q4)
-- Flooding demand is dominated by single days: 326 requests on 2023-12-04 and 281 on 2024-10-19 against trailing 60-day means of about 5-11 per day. Jan-Oct drainage requests rose 34% in 2024 and fell 45.5% in 2025, which is consistent with spike days driving annual change. (Q5, Q11)
-- Highest infrastructure request counts: Kensington-Cedar Cottage (9,365), Downtown (8,737), Renfrew-Collingwood (8,401). These are raw counts, not rates. (Q6, Q7)
-- Median days to close for infrastructure types ranges from 1 (Sewer Backup, Water Pressure, Pavement Marking) to 8 (Street Light Out). Street Light Out also has a long tail (mean 22 days, 90th percentile 48), and Street Light Pole Maintenance has a 90th percentile of 83 days. (Q8)
-- Sewer issues are reported by phone 87% of the time, versus about 37-39% for roads and lighting, which are mostly reported through the web or mobile app. (Q13)
-- 1,874 infrastructure requests are still open; 1,134 of them (across all 22 types) are more than 90 days old. Street Repair (325), Sidewalk Repair (219) and Pothole (95) lead, with the oldest about 4.8 years old. Open-and-old may mean unresolved or simply never updated. (Q14)
+- There are 1,323,904 requests; 110,823 (8.4%) are in the infrastructure groups. Sanitation is the largest department (25.8% of all requests) (Q1, Q15).
+- Largest infrastructure types: Pothole (19,823), Street Light Out (17,235), Street Repair (9,653), Street Surface Water Flooding (9,564) and Sidewalk Repair (9,048). Roads & Sidewalks is the largest group (42,725), then Lighting, Signals & Signs (34,479) (Q2).
+- Monthly volume ranges from 18,972 to 29,182 with no clear long-run growth: annual totals are 283,839 (2022), 267,128 (2023), 271,017 (2024) and 272,567 (2025), and January-October totals are 235,714, 224,956, 226,307, 230,661 and 225,864 for 2022-2026 (Q3, Q15).
+- Seasonal index by group (Q4): Drainage & Flooding is 136 in winter and 137 in autumn against 52 in summer. Roads & Sidewalks peaks in spring (127) and is lowest in autumn (76). Lighting is highest in autumn and winter (114, 110). Sewer is highest in autumn (122) and between 86 and 96 otherwise. Water Supply peaks in summer (111). The drainage autumn/winter peak appears in each year. I did not join weather data, so I can only describe the pattern, not explain it.
+- Drainage & Flooding has a few extreme days: 326 requests on 2023-12-04 and 281 on 2024-10-19 against trailing 60-day means of 10.6 and 5.1 (Q11). They are not what drives its annual swings, though. The ten busiest days are 13.0% of all drainage requests and the thirty busiest 22.7%. January-October drainage requests rose 34.0% in 2024 and fell 45.5% in 2025 (Q5); excluding days with 50 or more requests the counts are 1,772 and 1,029 (a 42% fall), so the 2025 drop is not a spike effect. I do not know why 2025 was lower.
+- Highest infrastructure request counts by neighbourhood: Kensington-Cedar Cottage (9,069), Downtown (8,610) and Renfrew-Collingwood (8,183). These are raw counts, not rates (Q6, Q7).
+- Median days to close for infrastructure types ranges from 1 (Sewer Backup, Water Pressure, Pavement Marking Maintenance) to 10 (Pavement Markings). Street Light Out has a median of 8 days but a mean of 22.3 and a 90th percentile of 48; Street Light Pole Maintenance has a 90th percentile of 83 days (Q8).
+- Outcome mix for closed infrastructure requests (Q9, Q15): 69.4% overall are "Service provided". By group: Sewer 86.5%, Water Supply 84.2%, Lighting 70.7%, Roads & Sidewalks 61.9%, Drainage & Flooding 61.0%. For Roads and Drainage, 20.4% and 22.7% were closed with "Further action has been planned", "Assigned to inspector" or "Dispatched to Crew", meaning the work continued elsewhere.
+- Sewer problems are reported by phone 87.3% of the time, versus 37.1% for Roads and 37.0% for Lighting, which are mostly reported through the web or app (Q13).
+- 1,854 infrastructure requests are open; 1,133 of them are more than 90 days old. Street Repair (325), Sidewalk Repair (219) and Pothole (95) have the most, and the oldest is about 4.8 years (Q14, Q15). An old open case may be unresolved or simply never updated.
+- Year-over-year change by group is in Q5 and the 12-month comparison in Q10. Roads & Sidewalks fell 15.8% in 2023 and has been within about 6% of the prior year since. I did not investigate the 2023 drop.
 
-Possible operational uses: staff drainage/catch-basin crews for autumn-winter and for forecast storm days; review why Roads and Drainage cases close with "action planned/handed off" 20-23% of the time; audit old open cases for clean-up; look at the Street Light Out tail.
-
-## Limitations and bias
-- 3-1-1 data measures *reported* demand, not infrastructure condition. Areas with more residents, more pedestrians, or higher reporting propensity generate more requests; neighbourhood counts are not normalised by population or road length.
-- 21% of requests lack a neighbourhood (1.1% of infrastructure requests), so neighbourhood totals for non-infrastructure services are understated.
-- Close dates have no time of day, so durations have a one-day resolution. Duration only covers closed requests; recent requests are less likely to be closed yet, so recent medians are biased low (Q12 uses a fixed 7-day window to reduce this).
-- Channel mix changed over time (mobile app adoption), which can shift volumes between categories independently of real-world issues.
-- Request types and department names have been reorganised by the City ("ZZ - OLD..."). Retired types remain in totals but are excluded from closure-duration statistics.
-- Duplicate reports of the same problem cannot be identified: there is no request ID and addresses are mostly missing.
-- The source dataset is a live extract; results will differ on re-download.
+## Limitations
+- 3-1-1 data measures reported demand, not infrastructure condition. Neighbourhoods with more residents, foot traffic or reporting habit generate more requests; counts are not normalised by population or road length.
+- 21.5% of requests have no neighbourhood, but only 2.6% of infrastructure requests (2,939) do. Non-infrastructure neighbourhood totals are understated more.
+- Close dates have no time of day, so durations have one-day resolution. Durations only cover closed requests, and recently opened requests are less likely to be closed yet, which biases recent medians low. Q12 uses a fixed 7-day window to reduce this.
+- The City reorganised request types during the period. `General Street Issues` and `Preventative Maintenance Program` first appear in August 2022, and `Sewer Operations Inquiry` falls from 593 requests in 2022 to 227 in 2023. Comparisons against 2022 are affected, and some "ZZ - OLD" types are retired.
+- The channel mix changed over time (mobile app share was 18.5% in 2022, 15.8% in 2024 and 22.4% in 2026), which can move volume between categories independently of real-world conditions.
+- Duplicate reports of the same problem cannot be identified: there is no request ID and most addresses are missing.
+- One request has a close date of 2026-11-29, after the snapshot date. It is kept as loaded.
+- The source dataset is a live extract; a new download will differ from these results.

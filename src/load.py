@@ -44,9 +44,8 @@ def main():
         print(f"  loaded {n:,} rows ({time.time() - t:.1f}s)")
 
         for name in ("02_transform.sql", "03_constraints_indexes.sql", "04_views.sql"):
-            if (SQL / name).exists():
-                print(f"Running {name}")
-                run_sql_file(conn, name)
+            print(f"Running {name}")
+            run_sql_file(conn, name)
 
 
 if __name__ == "__main__":

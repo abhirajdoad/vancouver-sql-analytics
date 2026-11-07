@@ -5,27 +5,27 @@ DROP INDEX
 ----------------------------------------------------------------------------------------------------------------------------------------------
  Finalize GroupAggregate (actual rows=12 loops=1)
    Group Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
-   Buffers: shared hit=16131 read=669 written=71
+   Buffers: shared hit=16103 read=697 written=1
    ->  Gather Merge (actual rows=36 loops=1)
          Workers Planned: 2
          Workers Launched: 2
-         Buffers: shared hit=16131 read=669 written=71
+         Buffers: shared hit=16103 read=697 written=1
          ->  Partial GroupAggregate (actual rows=12 loops=3)
                Group Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
-               Buffers: shared hit=16131 read=669 written=71
+               Buffers: shared hit=16103 read=697 written=1
                ->  Sort (actual rows=1281 loops=3)
                      Sort Key: (date_trunc('month'::text, (f.opened_date)::timestamp with time zone))
                      Sort Method: quicksort  Memory: 49kB
-                     Buffers: shared hit=16131 read=669 written=71
+                     Buffers: shared hit=16103 read=697 written=1
                      Worker 0:  Sort Method: quicksort  Memory: 49kB
                      Worker 1:  Sort Method: quicksort  Memory: 49kB
                      ->  Hash Join (actual rows=1281 loops=3)
                            Hash Cond: (f.request_type_id = t.request_type_id)
-                           Buffers: shared hit=16115 read=669 written=71
+                           Buffers: shared hit=16087 read=697 written=1
                            ->  Parallel Seq Scan on fact_service_request f (actual rows=90856 loops=3)
                                  Filter: ((opened_date >= '2025-01-01'::date) AND (opened_date < '2026-01-01'::date))
                                  Rows Removed by Filter: 350446
-                                 Buffers: shared hit=16076 read=669 written=71
+                                 Buffers: shared hit=16048 read=697 written=1
                            ->  Hash (actual rows=1 loops=3)
                                  Buckets: 1024  Batches: 1  Memory Usage: 9kB
                                  Buffers: shared hit=11
@@ -34,8 +34,8 @@ DROP INDEX
                                        Buffers: shared hit=11
  Planning:
    Buffers: shared hit=226
- Planning Time: 0.344 ms
- Execution Time: 39.084 ms
+ Planning Time: 0.349 ms
+ Execution Time: 44.891 ms
 (33 rows)
 
 ROLLBACK
@@ -63,7 +63,7 @@ ROLLBACK
                            Buffers: shared hit=7
  Planning:
    Buffers: shared hit=50
- Planning Time: 0.202 ms
- Execution Time: 2.815 ms
+ Planning Time: 0.227 ms
+ Execution Time: 2.962 ms
 (23 rows)
 

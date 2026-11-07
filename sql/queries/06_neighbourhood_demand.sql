@@ -1,4 +1,4 @@
--- Q3a. Neighbourhood demand. Requests without a local_area (~21% overall, ~1% of infrastructure
+-- Q3a. Neighbourhood demand. Requests without a local_area (~21% overall, 2.6% of infrastructure
 -- requests) are shown as their own row and left unranked, not dropped silently.
 -- Counts are raw volumes, not per-capita.
 WITH by_area AS (
