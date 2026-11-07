@@ -46,7 +46,7 @@ with st.sidebar:
     st.header("Filters")
     sel_groups = st.multiselect("Infrastructure groups", GROUPS, default=GROUPS)
     years = st.slider("Year opened", int(meta.lo.year), int(meta.hi.year), (int(meta.lo.year), int(meta.hi.year)))
-    st.caption("Filters apply to the infrastructure sections. 'Infrastructure' is an analyst-defined grouping "
+    st.caption("Filters apply to the infrastructure sections. 'Infrastructure' is a subjective grouping "
                "of request types (see docs/methodology.md).")
 
 if not sel_groups:
