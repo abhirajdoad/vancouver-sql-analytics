@@ -177,7 +177,7 @@ f7.update_layout(template=TEMPLATE, title="Seasonal index (100 = mean of the gro
                  yaxis_autorange="reversed", margin=dict(t=50, b=10), height=330)
 st.plotly_chart(f7, width="stretch")
 
-# ---- Insights -------------------------------------------------------------
+# ---- Observations ------------------------------------------------------
 st.subheader("Operational observations")
 top_type = types.iloc[-1]
 top_nb = order[-1]
