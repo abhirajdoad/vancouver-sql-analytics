@@ -46,6 +46,9 @@ docs/           methodology, data dictionary, data source, optimization notes, s
 results/        query outputs for the snapshot
 ```
 
+## Timeline
+I worked on this project locally from August to November 2026 and created this repository in November 2026 once it was finished, so the commit history starts at that point and does not show the earlier work.
+
 ## Data and licence
 Data: City of Vancouver Open Data, 3-1-1 service requests, under the [Open Government Licence - Vancouver](https://opendata.vancouver.ca/pages/licence/). Code: MIT.
 
